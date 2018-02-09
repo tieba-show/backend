@@ -37,7 +37,23 @@ class Image implements IImage
 //        foreach ($arrImagePath as $intIndex => $strImagePath) {
         for ($intIndex = 0; $intIndex < $intNum; ++$intIndex) {
             $strImagePath = $arrImagePath[$intIndex];
+//            $intWidth = null;
+//            $intHeight = null;
+//            $type = null;
+//            $attr = null;
             list($intWidth, $intHeight, $type, $attr) = getimagesize($strImagePath);
+
+//            try
+//            {
+//            }
+//            catch(\Exception $e)
+//            {
+//                echo 'Message: ' .$e->getMessage();
+//            }
+//            finally
+//            {
+//                echo $strImagePath . "<br>";
+//            }
 //            echo "getimagesize($strImagePath) : $intWidth, $intHeight, $type, $attr \n";
             $resSourceImage = null;
 //            \exif_imagetype($strImagePath)
@@ -95,6 +111,7 @@ class Image implements IImage
             case self::TYPE_PNG:
                 header("Content-Type: image/png");
                 $resOutput = imagepng($resImage, $strSavePath);
+//                $resOutput = imagepng($resImage);
                 break;
         }
         return $resOutput;

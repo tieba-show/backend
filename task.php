@@ -10,6 +10,7 @@
  * Time: 13:57
  */
 
+if (PHP_SAPI != 'cli') exit();
 
 require_once 'autoload.php';
 $arrConfig = require_once 'config.php';
@@ -75,7 +76,8 @@ function doTask($arrConfig, $arrTask) {
     foreach ($arrUsername as $strUsername) {
         echo $strUsername."\n";
         $arrUserInfo = null;
-        $cursor = $resMongo->selectOne($strUserTableName, ['data.name'=>$strUsername]);
+        $cursor = $resMongo->selectOne($strUserTableName, ['raw_name'=>$strUsername]);
+//        $cursor = $resMongo->selectOne($strUserTableName, ['data.name'=>$strUsername]);
 //        var_dump($cursor);
         if ($cursor) {
             $arrUserInfo = $cursor;
@@ -87,6 +89,8 @@ function doTask($arrConfig, $arrTask) {
 //        $intUid = Spider::getUidByUserInfo($arrUserInfo);
 //        $arrUid[] = $intUid;
         $strPortrait = Spider::getPortraitByUserInfo($arrUserInfo);
+        // 部分超长id和被封禁的id无法获取到Portrait所以直接pass
+        if (empty($strPortrait)) continue;
         $strPortraitWithoutQueryString = explode('?', $strPortrait)[0];
         $arrPortrait[] = $strPortraitWithoutQueryString;
         $resImage = Spider::getPortraitImage($strPortrait);

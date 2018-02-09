@@ -22,6 +22,9 @@ abstract class BaseSpider implements ISpider
 //        print_r($arrMatchContent);
         foreach ($arrMatchContent as $key => $value) {
             $strUsername = urldecode($value[1]);
+            // 超长id最长只见过20字的(exp:众里寻他千百度暮然回首那人却在灯火阑珊处)
+            // 保险起见写个28吧
+            if (mb_strlen($strUsername) > 28) continue;
 //            echo "urldecode:".$strUsername."\n";
             $strUsername = iconv('GBK', 'UTF-8', $strUsername);
             $arrMembers[] = $strUsername;
@@ -32,8 +35,8 @@ abstract class BaseSpider implements ISpider
     public static function getPortraitImage($strPortrait)
     {
         if (empty($strPortrait)) return null;
-//        $strUrl = 'https://gss0.baidu.com/7Ls0a8Sm2Q5IlBGlnYG/sys/portraitl/item/'.$strPortrait;
-        $strUrl = 'http://tb.himg.baidu.com/sys/portrait/item/'.$strPortrait;
+        $strUrl = 'https://gss0.baidu.com/7Ls0a8Sm2Q5IlBGlnYG/sys/portraitl/item/'.$strPortrait;
+//        $strUrl = 'http://tb.himg.baidu.com/sys/portrait/item/'.$strPortrait;
         $resImage = Network::httpGet($strUrl);
         return $resImage;
     }

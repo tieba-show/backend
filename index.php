@@ -10,6 +10,8 @@
  * Time: 14:18
  */
 
+//error_reporting(0);
+
 require_once 'autoload.php';
 $arrConfig = require_once 'config.php';
 
@@ -47,7 +49,7 @@ switch ($strAction) {
 //        $intHeight = $_REQUEST['height'];
 //        $intOutputType = $_REQUEST['output_type'];
 
-        $strTableName = $arrConfig['spider']['table_name']['task'];
+        $strTaskTableName = $arrConfig['spider']['table_name']['task'];
         $arrTask = [
             'forum_name' => $strForumName,
             'start_page' => $intStartPage,
@@ -71,15 +73,19 @@ switch ($strAction) {
         $intPageSize = $_REQUEST['page_size'];
         $intLast = $_REQUEST['last'];
 
-        $strTableName = $arrConfig['spider']['table_name']['task'];
-        $cursor = $resMongo->select($strTableName, [])
+        $strTaskTableName = $arrConfig['spider']['table_name']['task'];
+        $strForumTableName = $arrConfig['spider']['table_name']['forum'];
+        $cursor = $resMongo->select($strTaskTableName, [])
             ->sort(['create_time' => Mongo::SORT_DESC])
             ->skip($intPageSize * ($intPage - 1))
             ->limit($intPageSize);
         $arrTask = [];
         foreach ($cursor as $arrRow) {
             $arrRow['page_number'] = $arrRow['end_page'] - $arrRow['start_page'];
-            $arrRow['image_number'] = $arrRow['page_number'] * 20;
+            $cursorForum = $resMongo->selectOne($strForumTableName, ['forum_name'=>$arrRow['forum_name'] ]);
+            $intImageNumber = count($cursorForum['users']);
+            $arrRow['image_number'] = $intImageNumber;
+//            $arrRow['image_number'] = $arrRow['page_number'] * 20;
             // 此代码必须在这里，不然会因为create_time字段已经被date函数格式化处理之后导致路径错误
 //            $arrRow['output_path'] = Image::getSavePath($arrConfig, $arrRow, true);
             @$arrRow['spend_time'] = $arrRow['end_time'] - $arrRow['start_time'];
@@ -112,15 +118,10 @@ switch ($strAction) {
         break;
     case 'show_image':
         $strForumName = $_REQUEST['forum_name'];
-        $strTableName = $arrConfig['spider']['table_name']['forum'];
-        $cursor = $resMongo->selectOne($strTableName, ['forum_name'=>$strForumName]);
+        $strTaskTableName = $arrConfig['spider']['table_name']['forum'];
+        $cursor = $resMongo->selectOne($strTaskTableName, ['forum_name'=>$strForumName]);
 
         $arrUid = $cursor['users'];
-//        var_dump($cursor);
-        /*foreach ($cursor as $arrUids) {
-            $arrUid = $arrUids;
-            break;
-        }*/
 
         $arrImagePath = [];
         foreach ($arrUid as $intUid) {
@@ -128,12 +129,14 @@ switch ($strAction) {
             $arrImagePath[] = $strPath;
         }
 
-//        $intOutputType = $_REQUEST['output_type'];
-//        $intXNum = $_REQUEST['width'];
-//        $intYNum = $_REQUEST['height'];
-        $intOutputType = 2;
-        $intXNum = 4;
-        $intYNum = 5;
+        $intOutputType = $_REQUEST['output_type'];
+        $intXNum = $_REQUEST['width'];
+        $intYNum = $_REQUEST['height'];
+//        $intOutputType = 2;
+//        $intXNum = 4;
+//        $intYNum = 5;
+
+//        var_dump($arrImagePath);
 
         Image::sequenceMerge(null, $intOutputType, $arrImagePath, $intXNum, $intYNum);
         break;
