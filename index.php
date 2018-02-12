@@ -118,6 +118,54 @@ switch ($strAction) {
         break;
     case 'show_image':
         $strForumName = $_REQUEST['forum_name'];
+        $intOutputType = $_REQUEST['output_type'];
+        $intXNum = $_REQUEST['width'];
+        $intYNum = $_REQUEST['height'];
+        $arrTask = [
+            'forum_name' => $strForumName,
+//            'create_time' => time(),
+            'output_type' => $intOutputType,
+            'width' => $intXNum,
+            'height' => $intYNum,
+        ];
+        $strSavePath = Image::getSavePath($arrConfig, $arrTask, false);
+        $strSaveVirtualPath = Image::getSavePath($arrConfig, $arrTask, true);
+        $arrRet = [
+            'exist' => file_exists($strSavePath),
+            'path' => $strSaveVirtualPath,
+        ];
+        jsonReturn('', $arrRet);
+        break;
+    case 'generate_image':
+        if (!isset($_REQUEST['token']) || !isset($_REQUEST['verify_code']) || !VerifyCode::check($_REQUEST['token'], $_REQUEST['verify_code'])) {
+            jsonReturn('verify code error', $_REQUEST);
+            return;
+        }
+
+        set_time_limit(0);
+        ignore_user_abort(true);
+
+        $strForumName = $_REQUEST['forum_name'];
+        $intOutputType = $_REQUEST['output_type'];
+        $intXNum = $_REQUEST['width'];
+        $intYNum = $_REQUEST['height'];
+//        $intOutputType = 2;
+//        $intXNum = 4;
+//        $intYNum = 5;
+
+//        var_dump($arrImagePath);
+
+//        $s = time();
+
+        $arrTask = [
+            'forum_name' => $strForumName,
+//            'create_time' => time(),
+            'output_type' => $intOutputType,
+            'width' => $intXNum,
+            'height' => $intYNum,
+        ];
+        $strSavePath = Image::getSavePath($arrConfig, $arrTask);
+
         $strTaskTableName = $arrConfig['spider']['table_name']['forum'];
         $cursor = $resMongo->selectOne($strTaskTableName, ['forum_name'=>$strForumName]);
 
@@ -129,16 +177,12 @@ switch ($strAction) {
             $arrImagePath[] = $strPath;
         }
 
-        $intOutputType = $_REQUEST['output_type'];
-        $intXNum = $_REQUEST['width'];
-        $intYNum = $_REQUEST['height'];
-//        $intOutputType = 2;
-//        $intXNum = 4;
-//        $intYNum = 5;
+        jsonReturn('', '正在生成，请稍后查看。');
+//        echo "<script>alert('正在生成，请稍后查看。');window.close();</script>";
 
-//        var_dump($arrImagePath);
-
-        Image::sequenceMerge(null, $intOutputType, $arrImagePath, $intXNum, $intYNum);
+        Image::sequenceMerge($strSavePath, $intOutputType, $arrImagePath, $intXNum, $intYNum);
+//        $e = time()-$s;
+//        var_dump($e);
         break;
     default:
         break;

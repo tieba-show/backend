@@ -44,7 +44,7 @@ abstract class BaseSpider implements ISpider
     private static function _getForumRank($strForumName, $intStartPage, $intEndPage)
     {
         $strResponse = '';
-        for ($i=$intStartPage; $i < $intEndPage; $i++) {
+        for ($i=$intStartPage; $i <= $intEndPage; ++$i) {
             $strUrl = 'http://tieba.baidu.com/f/like/furank?ie=utf-8&kw='.$strForumName.'&pn='.$i;
             $strResponse .= Network::httpGet($strUrl);
         }

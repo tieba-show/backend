@@ -101,15 +101,15 @@ class Image implements IImage
 //                $resOutput = imagebmp($resImage, $strSavePath);
                 break;
             case self::TYPE_GIF:
-                header("Content-Type: image/gif");
+                if (is_null($strSavePath)) header("Content-Type: image/gif");
                 $resOutput = imagegif($resImage, $strSavePath);
                 break;
             case self::TYPE_JPEG:
-                header("Content-Type: image/jpeg");
+                if (is_null($strSavePath)) header("Content-Type: image/jpeg");
                 $resOutput = imagejpeg($resImage, $strSavePath);
                 break;
             case self::TYPE_PNG:
-                header("Content-Type: image/png");
+                if (is_null($strSavePath)) header("Content-Type: image/png");
                 $resOutput = imagepng($resImage, $strSavePath);
 //                $resOutput = imagepng($resImage);
                 break;
@@ -119,14 +119,12 @@ class Image implements IImage
 
     public static function getSavePath($arrConfig, $arrTask, $bolIsVirtual=true) {
         $strForumName = $arrTask['forum_name'];
-        $intCreateTime = $arrTask['create_time'];
+//        $intCreateTime = $arrTask['create_time'];
         $intOutputType = $arrTask['output_type'];
-        $strSavePath = '';
-        if ($bolIsVirtual) {
-            $strSavePath = $arrConfig['spider']['path']['output_save_path'].'/'.$strForumName.'_'.$intCreateTime.'_'.$arrTask['width'].'_'.$arrTask['height'];
-        } else {
-            $strForumName = iconv('UTF-8', 'GBK', $strForumName);
-            $strSavePath = $arrConfig['spider']['path']['base_path'].'/'.$arrConfig['spider']['path']['output_save_path'].'/'.$strForumName.'_'.$intCreateTime.'_'.$arrTask['width'].'_'.$arrTask['height'];
+        $strForumName = iconv('UTF-8', 'GBK', $strForumName);
+        $strSavePath = $arrConfig['spider']['path']['output_save_path'].'/'.$strForumName.'_'.$arrTask['width'].'_'.$arrTask['height'];
+        if (!$bolIsVirtual) {
+            $strSavePath = $arrConfig['spider']['path']['base_path'].'/'.$strSavePath;
         }
 //        var_dump($strSavePath);
         switch ($intOutputType) {
